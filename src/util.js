@@ -7,5 +7,13 @@ export default {
     getFilterArray(array){
         const set = new Set(array);
         return [...set];
+    },
+    //存到本地
+    saveLocal(item){
+        window.localStorage.setItem('MyCart',JSON.stringify(item))
+    },
+    //读取本地
+    getLocal(){
+        return JSON.parse(localStorage.getItem("MyCart"))
     }
 }

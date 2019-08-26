@@ -20,7 +20,7 @@
 
 <script>
     //导入本地数据
-    import product_data from '../product.js';
+    import product_data from '../newproduct.js';
 
     export default {
         data(){

@@ -6,6 +6,7 @@
                 <span class="list-control-filter-item"
                       :class="{on: item === filterBrand}"
                       v-for="item in brands"
+                      :key="item"
                       @click="handleFilterBrand(item)">{{item}}</span>
             </div>
             <div class="list-control-filter">
@@ -13,6 +14,7 @@
                 <span class="list-control-filter-item"
                       :class="{on: item === filterColor}"
                       v-for="item in colors"
+                      :key="item"
                       @click="handleFilterColor(item)">{{item}}</span>
             </div>
 
@@ -34,9 +36,17 @@
                     <template v-if="order === 'cost-desc'">↓</template>
                     <template v-if="order === 'cost-asc'">↑</template>
                 </span>
+                <span class="list-control-order-item"
+                      :class="{on: order.indexOf('stock') > -1}"
+                      @click="handleOrderStock">
+                    库存
+                    <template v-if="order === 'stock'">↓</template>
+                </span>
+
             </div>
         </div>
-        <Product v-for="item in filteredAndOrderedList" :info="item" :key="item.id"></Product>
+        <!-- <Product v-for="item in filteredAndOrderedList" :info="item" :key="item.id"></Product> -->
+        <ProductMore v-for = "item in filteredAndOrderedList" :info="item" :key="item.id"></ProductMore>
         <div class="product-not-found"
              v-show="!filteredAndOrderedList.length">暂无相关商品</div>
     </div>
@@ -44,9 +54,14 @@
 
 <script>
     //导入商品简介组件
-    import Product from '../components/product.vue';
+    // import Product from '../components/product.vue';
+    import ProductMore from '../components/product-more.vue'
     export default {
-        components: {Product},
+        components: {
+            // Product,
+            ProductMore
+            },
+        
         computed: {
             list(){
                 //从Vuex获取商品列表信息
@@ -67,16 +82,22 @@
                 }
                 //颜色过滤
                 if(this.filterColor !== ''){
-                    list = list.filter(item => item.color === this.filterColor);
+                    list = list.filter(item=>{
+                        return item.children.some(item=>item.color === this.filterColor)
+                        })
+                    
                 }
                 //排序
                 if(this.order !== ''){
                     if(this.order === 'sales'){
                         list = list.sort((a, b) => b.sales - a.sales);
                     }else if(this.order === 'cost-desc'){
-                        list = list.sort((a, b) => b.cost - a.cost);
+                        list = list.sort((a, b) => b.children[0].cost - a.children[0].cost);
                     }else if(this.order === 'cost-asc'){
-                        list = list.sort((a, b) => a.cost - b.cost);
+                        list = list.sort((a, b) => a.children[0].cost - b.children[0].cost);
+                    
+                    }else if (this.order === 'stock'){
+                        list = list.sort((a,b)=>b.children[0].stock-a.children[0].stock)
                     }
                 }
                 return list;
@@ -120,6 +141,9 @@
             handleOrderSales(){
                 this.order = 'sales';
             },
+            handleOrderStock(){
+                this.order = 'stock';
+            },
             handleOrderCost(){
                 //当点击升序时将箭头更新↓,降序设置为↑
                 if(this.order === 'cost-desc'){
@@ -133,7 +157,8 @@
         mounted(){
             //初始化时通过Vuex actions获取商品列表信息
             this.$store.dispatch('getProductList');
-        }
+        },
+        
     }
 </script>
 

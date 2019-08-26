@@ -5,6 +5,7 @@
             <div class="cart-header-main">
                 <div class="cart-info">商品信息</div>
                 <div class="cart-price">单价</div>
+                <div class="cart-stock">库存</div>
                 <div class="cart-count">数量</div>
                 <div class="cart-cost">小计</div>
                 <div class="cart-delete">删除</div>
@@ -12,13 +13,16 @@
         </div>
         <div class="cart-content">
             <!-- 列表显示购物清单 -->
-            <div class="cart-content-main" v-for="(item, index) in cartList">
+            <div class="cart-content-main" v-for="(item, index) in cartList" :key="index">
                 <div class="cart-info">
-                    <img :src="productDictList[item.id].image">
-                    <span>{{productDictList[item.id].name}}</span>
+                    <img :src="item.children.image">
+                    <span>{{item.name}}</span>
                 </div>
                 <div class="cart-price">
-                    ￥ {{productDictList[item.id].cost}}
+                    ￥ {{item.children.cost}}
+                </div>
+                <div class="cart-stock">
+                    {{item.children.stock}}
                 </div>
                 <div class="cart-count">
                     <span class="cart-control-minus"
@@ -28,7 +32,7 @@
                           @click="handleCount(index, 1)">+</span>
                 </div>
                 <div class="cart-cost">
-                    ￥ {{productDictList[item.id].cost * item.count}}
+                    ￥ {{item.children.cost * item.count}}
                 </div>
                 <div class="cart-delete">
                     <span class="cart-control-delete"
@@ -63,14 +67,14 @@
 </template>
 
 <script>
-    import product_data from '../product';
+    import product_data from '../newproduct';
     export default {
         name: "cart",
         data(){
             return {
                 promotion: 0,
                 promotionCode: '',
-                productList: product_data
+                // productList: product_data
             }
         },
         computed: {
@@ -79,13 +83,13 @@
                 return this.$store.state.cartList;
             },
             //设置字典对象，方便查询
-            productDictList(){
-                const dict = {};
-                this.productList.forEach(item => {
-                    dict[item.id] = item;
-                });
-                return dict;
-            },
+            // productDictList(){
+            //     const dict = {};
+            //     this.productList.forEach(item => {
+            //         dict[item.id] = item;
+            //     });
+            //     return dict;
+            // },
             //购物车商品总数
             countAll(){
                 let count = 0;
@@ -98,7 +102,7 @@
             costAll(){
                 let cost = 0;
                 this.cartList.forEach(item => {
-                    cost += this.productDictList[item.id].cost * item.count;
+                    cost += item.children.cost * item.count;
                 });
                 return cost;
             }
@@ -106,7 +110,7 @@
         methods: {
             //通知Vuex,完成下单
             handleOrder(){
-                this.$store.dispatch('buy').then(() => {
+                this.$store.dispatch('buy',this.cartList).then(() => {
                     window.alert('购买成功');
                 })
             },
@@ -127,13 +131,14 @@
                 //最小值设置1
                 if(count < 0 && this.cartList[index].count === 1) return;
                 this.$store.commit('editCartCount', {
-                    id: this.cartList[index].id,
+                    categoryId: this.cartList[index].categoryId,
+                    goodsId:this.cartList[index].children.goodsId,
                     count: count
                 });
             },
             //根据index查找商品id进行删除
             handleDelete(index){
-                this.$store.commit('deleteCart', this.cartList[index].id);
+                this.$store.commit('deleteCart', this.cartList[index]);
             }
         }
     }
@@ -169,14 +174,17 @@
         font-size: 14px;
     }
     div.cart-info{
-        width: 60%;
+        width: 40%;
         text-align: left;
+    }
+    .cart-stock{
+        width: 10%;
     }
     .cart-price{
         width: 10%;
     }
     .cart-count{
-        width: 10%;
+        width: 20%;
     }
     .cart-cost{
         width: 10%;

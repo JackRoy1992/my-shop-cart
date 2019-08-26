@@ -6,11 +6,19 @@
             <img :src="info.image">
             <h4>{{info.name}}</h4>
             <h4>销量{{info.sales}}</h4>
-            <div class="product-color"
-                 :style="{background: colors[info.color]}"></div>
+            <h4>库存{{info.stock}}</h4>
+            <!-- 源代码产品数据只有一种颜色 -->
+            <!-- <div class="product-color"
+                 :style="{background: colors[info.color]}"></div> -->
+            <!-- 修改成多个颜色 -->
+            <span class="product-color" 
+                v-for="(item,index) in info.color"
+                :key="index"
+                :style="{background: colors[item]}"></span>
             <div class="product-cost">￥ {{info.cost}}</div>
             <!-- 阻止冒泡，否则点击按钮的同时也会触发a标签进入详情页 -->
             <div class="product-add-cart"
+                :class = "{soldOut: info.stock === 0}"
                  @click.prevent="handleAddCart">加入购物车</div>
         </router-link>
     </div>
@@ -68,7 +76,7 @@
         color: #0070c9;
     }
     .product-color{
-        display: block;
+        display: inline-block;
         width: 16px;
         height: 16px;
         border: 1px solid #dddee1;
@@ -90,6 +98,10 @@
         position: absolute;
         top: 5px;
         right: 5px;
+    }
+    .product-add-cart.soldOut {
+        background-color: gray;
+        cursor: not-allowed;
     }
     .product-main:hover .product-add-cart{
         display: inline-block;

@@ -1,18 +1,13 @@
 <template>
-    <div class="swiper">  
-            <!-- <div class="box"> -->
-                <transition-group tag="ul" name="list"  :style="{width:swiperWidth}">
+    <div class="swiper" @mouseenter="stopSwiper()" @mouseleave="continuteSwiper()">  
+                <transition-group tag="ul" name="list">
                 <li class="swiperItem" v-for="(item,index) in imgArr" :key="index" 
-                  v-show="index === currentIndex" :style="{width:itemWidth}"
-                >
-                <!-- <div class="swiperItem" v-for="item in imgArr" :key="item.id"> -->
+                  v-show="index === currentIndex">
                     <img :src="item">
-                    <!-- <img :src="item.image"> -->
                 </li>
                 </transition-group>
-            <!-- </div> -->
         <div class="pointer">
-            <span v-for="(item,index) in imgArr"  @click="changeSwiper(index)" @mouseover="stopSwiper" :key="index" 
+            <span v-for="(item,index) in imgArr"  @click="changeSwiper(index)" :key="index" 
             class="dot"
             :class="{active: index === currentIndex}"
             ></span>
@@ -22,17 +17,20 @@
 <style scoped>
     ul {
         list-style: none;
-        overflow: hidden;
+        width: 100%;
+        height: 220px;
+        position: relative;
     }
     .swiper{
         width: 220px;
         height: 250px;
-        overflow: hidden;
         position: relative;
+        overflow: hidden;
     }
     .swiperItem {
-        height: 220px;
-        float: left;
+        position: absolute;
+        width: 100%;
+        height: 100%;
     }
     .pointer {
         width: 200px;
@@ -57,7 +55,7 @@
     .list-enter {
         transform: translateX(100%)
     }
-    .list-enter-active {
+    .list-enter-to {
         transition: all 1s ease;
         transform: translateX(0);
     }
@@ -83,33 +81,30 @@ export default {
                 '/src/images/BeatsX_2.jpg',
                 '/src/images/BeatsX_3.jpg',
                 '/src/images/BeatsX_4.jpg'
-            ],
-            // 鼠标悬停时
-            hover:false,
-            // 每一张图片的宽度
-            itemWidth: '',
-            // ul的宽度
-            swiperWidth: ''
+            ]
         }
     },
-    // 挂载之前动态计算ul长度
-    beforeMount(){
-        let total = this.imgArr.length
-        this.swiperWidth = 220 * total +'px'
-        this.itemWidth = 100/total +'%'
-    },
+    
     methods:{
         changeSwiper(index){
             this.currentIndex = index
         },
         stopSwiper(){
-            clearInterval(timer)
+            clearInterval(this.timer)
+        },
+        continuteSwiper(){
+            this.timer = setInterval(()=>{
+                this.currentIndex ++
+                if(this.currentIndex>=this.imgArr.length){
+                    this.currentIndex = 0
+                }
+            },2000)
         }
     },
     mounted(){
         this.timer = setInterval(()=>{
             this.currentIndex ++
-            if(this.currentIndex>this.imgArr.length){
+            if(this.currentIndex>=this.imgArr.length){
                 this.currentIndex = 0
             }
         },2000)

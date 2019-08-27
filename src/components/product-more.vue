@@ -1,9 +1,11 @@
 <template>
     <div class="product">
-    <div class="product-main"> 
-            <router-link class="link" :to="`/product/productId=${info.categoryId}&goodsId=${info.children[currentIndex].goodsId}`" >
-                    <img :src="imgSrc">
+    <div class="product-main" @mouseenter="stopSwiper()" @mouseleave="continuteSwiper()"> 
+        <transition-group name="list" tag="div" >
+            <router-link class="link" :to="`/product/productId=${info.categoryId}&goodsId=${info.children[currentIndex].goodsId}`" :key="info.categoryId" >
+                    <img :src="imgSrc" >
             </router-link>
+        </transition-group>
         <h4>{{info.name}}</h4>
         <h4>销量{{info.sales}}</h4>
         <h4>库存{{stock}}</h4>
@@ -38,7 +40,8 @@
                     '金色': '#dac272',
                     '蓝色': '#233472',
                     '红色': '#f2352e'
-                }
+                },
+                timer:null
             }
         },
         computed:{
@@ -63,7 +66,27 @@
                 }
                 // console.log(AddPro)
                 this.$store.commit('addCart', AddPro);
+            },
+            autoPlay(){
+                let num = this.info.children.length
+                console.log('111',num)
+                if(num === 1) return false
+                this.timer = setInterval(()=>{
+                    this.currentIndex++
+                    if(this.currentIndex>=num){
+                        this.currentIndex = 0
+                    }
+                },2000)
+            },
+            stopSwiper(){
+                clearInterval(this.timer)
+            },
+            continuteSwiper(){
+                this.autoPlay()
             }
+        },
+        mounted(){
+            this.autoPlay()
         }
     }
 </script>
@@ -144,15 +167,5 @@
         transition: all 1s ease;
         transform: translateX(-100%)
     }
-    /* .link {
-        display: block;
-        width: 100%;
-        height: 220px;
-        overflow: hidden;
-    }
-    .swiper {
-    }
-    .swiperItem {
-        float: left;
-    } */
+    
 </style>
